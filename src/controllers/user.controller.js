@@ -5,12 +5,29 @@ import { ApiResponse } from "../utils/ApiResponse";
 import fs from "fs";
 
 
-
+const generateAccessandRefreshToken = async(userId) => {
+    try {
+      const user = await User.findById(userId)
+      const accessToken = user.generateAccessToken()
+      const refreshToken = user.generateRefreshToken()
+  
+      user.refreshToken = refreshToken
+      await user.save({validateBeforeSave: false})
+  
+      return{ accessToken , refreshToken }
+  
+    } catch (error) {
+      return res 
+      .status(500)
+      .json({meaasge: "Something went wrong while generating refresh and access token "});
+      
+    }
+  }
 
 
 
 const registerUser = async (req, res) => {
-    console.log(email, email);
+    //console.log(email, email);
     const imageFile = req.files["image"] ? req.files["image"][0] : null;
     const { fullname, username, email, password } = req.body;
     console.log("name", fullname);
@@ -59,7 +76,99 @@ const registerUser = async (req, res) => {
         .json(new ApiResponse(200, createdUser, "User registered successfully"));
 };
 
+const loginUser = async (req, res) => {
+  
+    //check if existeduser already exists with this email and username 
+    // take the username/ email and password hashed 
+    //check if hashed password matched correctly 
+    //not matched then password reset option 
+    // access token and refresh token 
+    //access token and efresh token is sendin cookies
+    // if logged successfully take him to home page 
+    const{email , username , password} = req.body
+    console.log(req.body);
+    if (!username && !email ){
+      return res
+      .status(400)
+      .json({message: "username or email is required for login"});
+    }
+  
+  
+    const user = await User.findOne({
+      $or: [{username} , {email}]
+    })
+  
+    if(!user) {
+      return res
+      .status(404)
+      .json({message: "User does not exist "});
+    }
+  
+    const isPasswordValid = await user.isPasswordCorrect(password)
+    if(!isPasswordValid) {
+      return res
+      .status(401)
+      .json({message: "The password is wrong "});
+    }
+  
+    const {accessToken , refreshToken } = await generateAccessandRefreshToken(user._id)
+  
+    const loggedInUser = await User.findById(user._id)
+    .select("-password -refreshToken")
+  
+    const options = {
+      httpOnly: true, 
+      secure: true
+    }
+  
+    return res
+    .status(200)
+    .cookie("accessToken", accessToken , options)
+    .cookie("refreshToken", refreshToken , options)
+    .json(new ApiResponse(
+      200, {
+        user: loggedInUser , accessToken , refreshToken
+      },
+      "User logged In Successfully"
+    ))
+  
+  
+};
+
+const logoutUser = async(req, res ,next)=> {
+    try {
+      const {userId} = req.body;
+      await User.findByIdAndUpdate(userId||
+        req.user._id,
+        {
+          $set: {
+            refreshToken: undefined
+          }
+        },
+        {
+          new: true
+        }
+      )
+    
+      const options = {
+        httpOnly: true, 
+        secure: true
+      }
+    
+      return res.status(200)
+      .clearCookie("accessToken", options)
+      .clearCookie("refreshToken", options)
+      .json("User logged out");
+    
+    
+    } catch (error) {
+      next(error);
+    }
+}; 
+
 
 export {
-    registerUser
+    registerUser,
+    loginUser
 };
+

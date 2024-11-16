@@ -1,24 +1,31 @@
-import express from "express"
 import cors from "cors"
-import cookieParser from "cookie-parser"
-import dotenv from "dotenv";
-dotenv.config ();
+import dotenv from "dotenv"
+import express from "express"
 
-const app = express();
+import cookieParser from "cookie-parser"
+const app= express()
+
+dotenv.config({
+    path:"../.env"
+})
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: "process.env.PORT",
     credentials: true
-}))
+}));
 
-app.use(express.json({limit: "20kb" }))
-app.use(express.urlencoded({extended: true}))
-app.use(express.static("public"))
+
+app.use(express.json ({}));
+app.use(express.urlencoded ({extended: true}));
+app.use(express.static("public"));
 app.use(cookieParser())
 
-import userRouter from "./routes/user.routes.js";
+// routes import 
+import userRouter from './routes/user.routes.js'
 
-app.use("/api/v1/users" , userRouter)
+// routes declaration 
+
+app.use("/api/v1/users", userRouter)
 
 
 

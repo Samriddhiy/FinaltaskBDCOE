@@ -10,6 +10,7 @@ import fs from "fs";
 
 
 const registerUser = async (req, res) => {
+    console.log(email, email);
     const imageFile = req.files["image"] ? req.files["image"][0] : null;
     const { fullname, username, email, password } = req.body;
     console.log("name", fullname);
@@ -32,7 +33,7 @@ const registerUser = async (req, res) => {
      console.log(existedUser)
        if (existedUser) {
         return res.status(400).json({
-            status: 400,
+            status: 409,
             message: "User already exists with this email or username",
           });
         }

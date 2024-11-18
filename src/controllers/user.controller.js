@@ -25,15 +25,6 @@ const generateAccessandRefreshToken = async(userId) => {
 }
 
 const registerUser = async (req, res) => {
-  //get user details
-  //validation- not empty
-  // check if user already exists
-  // check for images,
-  //upload them to cloudinary
-  // create user object- create entry in db
-  //remove password and refresh token field from response
-  // check for user creation
-  // return response
   const imageFile = req.files["image"] ? req.files["image"][0] : null;
 
   const { fullname, username, email, password } = req.body;
@@ -96,14 +87,6 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  
-  //check if existeduser already exists with this email and username 
-  // take the username/ email and password hashed 
-  //check if hashed password matched correctly 
-  //not matched then password reset option 
-  // access token and refresh token 
-  //access token and efresh token is sendin cookies
-  // if logged successfully take him to home page 
   const{email , username , password} = req.body
   console.log(req.body);
   if (!username && !email ){
@@ -191,6 +174,5 @@ const logoutUser = async(req, res ,next)=> {
 export { 
     registerUser ,
     loginUser,
-    logoutUser, 
-    searchMovies
+    logoutUser
 };

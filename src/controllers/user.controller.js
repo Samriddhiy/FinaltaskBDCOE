@@ -32,6 +32,7 @@ const registerUser = async (req, res) => {
   console.log("name", fullname);
   console.log("username", username); 
   console.log("email", email);
+  console.log("image", imageFile);
   console.log(password);
 
 
